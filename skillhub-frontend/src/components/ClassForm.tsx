@@ -32,7 +32,7 @@ const ClassForm = ({ onSubmit, onCancel, defaultValues }: ClassFormProps) => {
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ mt: 1 }}
+      sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}
     >
       <TextField
         margin="normal"

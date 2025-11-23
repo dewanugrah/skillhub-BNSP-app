@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -14,7 +14,12 @@ import {
   Divider,
   Paper,
   Link,
+  Button,
+  Stack,
+  Grid,
+  Chip,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getClassById } from '../services/classService';
 import { findEnrollmentsByClass } from '../services/enrollmentService';
 import type { Class } from '../types/class';
@@ -23,12 +28,13 @@ import ErrorDisplay from '../components/ErrorDisplay';
 
 const ClassDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [classData, setClassData] = useState<Class | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!id) return;
 
     try {
@@ -47,11 +53,11 @@ const ClassDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -82,22 +88,61 @@ const ClassDetailPage = () => {
   }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Card>
-        <CardContent>
+    <Container sx={{ mt: 2, mb: 6 }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={2} sx={{ mb: 3 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          sx={{ alignSelf: 'flex-start' }}
+        >
+          Kembali
+        </Button>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            {classData.className}
+            Detail Kelas
           </Typography>
-          <Typography variant="body1">
-            <strong>Instruktur:</strong> {classData.instructor}
+          <Typography color="text.secondary">
+            Informasi lengkap kelas dan peserta yang terdaftar.
           </Typography>
-          <Typography variant="body1">
-            <strong>Deskripsi:</strong> {classData.description || 'N/A'}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Dibuat pada:</strong> {new Date(classData.createdAt).toLocaleDateString()}
-          </Typography>
-        </CardContent>
+        </Box>
+      </Stack>
+
+      <Card
+        sx={{
+          p: 3,
+          border: '1px solid rgba(15,118,110,0.14)',
+          background: 'linear-gradient(135deg, rgba(15,118,110,0.08), rgba(245,158,11,0.06))',
+        }}
+        elevation={0}
+      >
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="flex-start">
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              {classData.className}
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Chip label={`Instruktur: ${classData.instructor}`} color="primary" variant="outlined" />
+              <Chip label={`${enrollments.length} peserta terdaftar`} color="secondary" variant="filled" />
+            </Stack>
+          </Box>
+          <Box sx={{ minWidth: 140, textAlign: { xs: 'left', sm: 'right' } }}>
+            <Typography variant="body2" color="text.secondary">
+              Dibuat
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {new Date(classData.createdAt).toLocaleDateString()}
+            </Typography>
+          </Box>
+        </Stack>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={12}>
+            <Typography variant="body2" color="text.secondary">
+              Deskripsi
+            </Typography>
+            <Typography variant="body1">{classData.description || 'Belum ada deskripsi'}</Typography>
+          </Grid>
+        </Grid>
       </Card>
 
       <Box sx={{ mt: 4 }}>
@@ -105,7 +150,7 @@ const ClassDetailPage = () => {
           Peserta yang Terdaftar
         </Typography>
         {enrollments.length > 0 ? (
-          <List component={Paper}>
+          <List component={Paper} sx={{ borderRadius: 2, overflow: 'hidden' }}>
             {enrollments.map((enrollment, index) => (
               <Box key={enrollment.id}>
                 <ListItem>

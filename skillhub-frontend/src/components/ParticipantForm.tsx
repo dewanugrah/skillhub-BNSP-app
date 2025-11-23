@@ -1,21 +1,36 @@
-// src/components/ParticipantForm.tsx
+/**
+ * Form component untuk membuat dan mengedit data peserta
+ * Menggunakan React Hook Form dengan Zod validation
+ */
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Box, TextField, Button } from '@mui/material';
 import type { ParticipantCreationData } from '../services/participantService';
 
-// Define the validation schema using Zod
+/**
+ * Zod schema untuk validasi form peserta
+ * Validasi dilakukan di client-side sebelum submit ke backend
+ */
 const participantSchema = z.object({
   name: z.string().min(1, { message: 'Nama tidak boleh kosong' }),
   email: z.string().email({ message: 'Format email tidak valid' }),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.union([
+    z.string().regex(/^\d+$/, { message: 'Nomor telepon hanya boleh berisi angka' }),
+    z.literal('')
+  ]).optional(),
   address: z.string().optional(),
 });
 
+/**
+ * Props untuk ParticipantForm component
+ */
 interface ParticipantFormProps {
+  /** Callback function yang dipanggil saat form di-submit */
   onSubmit: (data: ParticipantCreationData) => void;
+  /** Callback function yang dipanggil saat user cancel */
   onCancel: () => void;
+  /** Default values untuk edit mode (opsional) */
   defaultValues?: Partial<ParticipantCreationData>;
 }
 
@@ -33,7 +48,7 @@ const ParticipantForm = ({ onSubmit, onCancel, defaultValues }: ParticipantFormP
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ mt: 1 }}
+      sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}
     >
       <TextField
         margin="normal"

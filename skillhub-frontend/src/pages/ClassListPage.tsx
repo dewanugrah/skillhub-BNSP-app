@@ -28,6 +28,8 @@ import {
   DialogTitle,
   DialogContent,
   Link,
+  Stack,
+  Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -117,58 +119,80 @@ const ClassListPage = () => {
   }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" component="h1">
-          Daftar Kelas
-        </Typography>
-        <Button variant="contained" color="primary" onClick={() => handleOpenModal()}>
-          Tambah Kelas
-        </Button>
-      </Box>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Nama Kelas</TableCell>
-              <TableCell>Instruktur</TableCell>
-              <TableCell>Deskripsi</TableCell>
-              <TableCell align="right">Aksi</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {classes.map((singleClass) => (
-              <TableRow
-                key={singleClass.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  <Link component={RouterLink} to={`/classes/${singleClass.id}`} underline="hover">
-                    {singleClass.className}
-                  </Link>
-                </TableCell>
-                <TableCell>{singleClass.instructor}</TableCell>
-                <TableCell>{singleClass.description}</TableCell>
-                <TableCell align="right">
-                  <IconButton aria-label="edit" onClick={() => handleOpenModal(singleClass)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton aria-label="delete" onClick={() => handleDelete(singleClass.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {classes.length === 0 && !loading && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          Tidak ada data kelas.
-        </Alert>
-      )}
+    <Container sx={{ mt: 2, mb: 6 }}>
+      <Paper
+        sx={{
+          p: 3,
+          mb: 3,
+          background: 'linear-gradient(135deg, rgba(15,118,110,0.12), rgba(245,158,11,0.12))',
+          border: '1px solid rgba(15,118,110,0.14)',
+        }}
+        elevation={0}
+      >
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Kelas Pelatihan
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Pantau sesi pelatihan dan kelola detail instruktur serta deskripsinya.
+            </Typography>
+            <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              <Chip label={`${classes.length || 0} kelas aktif`} color="primary" variant="outlined" />
+            </Stack>
+          </Box>
+          <Button variant="contained" color="primary" onClick={() => handleOpenModal()} size="large">
+            Tambah Kelas
+          </Button>
+        </Stack>
+      </Paper>
 
-      <Dialog open={isModalOpen} onClose={handleCloseModal}>
+      <Paper sx={{ overflow: 'hidden' }}>
+        <TableContainer>
+          <Table sx={{ minWidth: 700 }} aria-label="daftar kelas">
+            <TableHead>
+              <TableRow>
+                <TableCell>Nama Kelas</TableCell>
+                <TableCell>Instruktur</TableCell>
+                <TableCell>Deskripsi</TableCell>
+                <TableCell align="right">Aksi</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {classes.map((singleClass) => (
+                <TableRow
+                  key={singleClass.id}
+                  hover
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 600 }}>
+                    <Link component={RouterLink} to={`/classes/${singleClass.id}`} underline="hover">
+                      {singleClass.className}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{singleClass.instructor}</TableCell>
+                  <TableCell>{singleClass.description || '-'}</TableCell>
+                  <TableCell align="right">
+                    <IconButton aria-label="edit" onClick={() => handleOpenModal(singleClass)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton aria-label="delete" onClick={() => handleDelete(singleClass.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {classes.length === 0 && !loading && (
+          <Alert severity="info" sx={{ m: 2 }}>
+            Tidak ada data kelas. Mulai dengan menambah kelas baru.
+          </Alert>
+        )}
+      </Paper>
+
+      <Dialog open={isModalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
         <DialogTitle>{editingClass ? 'Edit Kelas' : 'Tambah Kelas Baru'}</DialogTitle>
         <DialogContent>
           <ClassForm

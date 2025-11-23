@@ -28,6 +28,8 @@ import {
   DialogTitle,
   DialogContent,
   Link,
+  Stack,
+  Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -118,58 +120,80 @@ const ParticipantListPage = () => {
   }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" component="h1">
-          Daftar Peserta
-        </Typography>
-        <Button variant="contained" color="primary" onClick={() => handleOpenModal()}>
-          Tambah Peserta
-        </Button>
-      </Box>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Nama</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Nomor Telepon</TableCell>
-              <TableCell align="right">Aksi</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {participants.map((participant) => (
-              <TableRow
-                key={participant.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  <Link component={RouterLink} to={`/participants/${participant.id}`} underline="hover">
-                    {participant.name}
-                  </Link>
-                </TableCell>
-                <TableCell>{participant.email}</TableCell>
-                <TableCell>{participant.phoneNumber}</TableCell>
-                <TableCell align="right">
-                  <IconButton aria-label="edit" onClick={() => handleOpenModal(participant)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton aria-label="delete" onClick={() => handleDelete(participant.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {participants.length === 0 && !loading && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          Tidak ada data peserta.
-        </Alert>
-      )}
+    <Container sx={{ mt: 2, mb: 6 }}>
+      <Paper
+        sx={{
+          p: 3,
+          mb: 3,
+          background: 'linear-gradient(135deg, rgba(15,118,110,0.12), rgba(245,158,11,0.12))',
+          border: '1px solid rgba(15,118,110,0.14)',
+        }}
+        elevation={0}
+      >
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Peserta SkillHub
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Pantau seluruh peserta, buka detail mereka, dan kelola data dengan cepat.
+            </Typography>
+            <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              <Chip label={`${participants.length || 0} peserta terdaftar`} color="primary" variant="outlined" />
+            </Stack>
+          </Box>
+          <Button variant="contained" color="primary" onClick={() => handleOpenModal()} size="large">
+            Tambah Peserta
+          </Button>
+        </Stack>
+      </Paper>
 
-      <Dialog open={isModalOpen} onClose={handleCloseModal}>
+      <Paper sx={{ overflow: 'hidden' }}>
+        <TableContainer>
+          <Table sx={{ minWidth: 700 }} aria-label="daftar peserta">
+            <TableHead>
+              <TableRow>
+                <TableCell>Nama</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Nomor Telepon</TableCell>
+                <TableCell align="right">Aksi</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {participants.map((participant) => (
+                <TableRow
+                  key={participant.id}
+                  hover
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 600 }}>
+                    <Link component={RouterLink} to={`/participants/${participant.id}`} underline="hover">
+                      {participant.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{participant.email}</TableCell>
+                  <TableCell>{participant.phoneNumber || '-'}</TableCell>
+                  <TableCell align="right">
+                    <IconButton aria-label="edit" onClick={() => handleOpenModal(participant)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton aria-label="delete" onClick={() => handleDelete(participant.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {participants.length === 0 && !loading && (
+          <Alert severity="info" sx={{ m: 2 }}>
+            Tidak ada data peserta. Mulai dengan menambah peserta baru.
+          </Alert>
+        )}
+      </Paper>
+
+      <Dialog open={isModalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
         <DialogTitle>{editingParticipant ? 'Edit Peserta' : 'Tambah Peserta Baru'}</DialogTitle>
         <DialogContent>
           <ParticipantForm

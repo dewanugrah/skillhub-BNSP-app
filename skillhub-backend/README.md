@@ -1,98 +1,397 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# SkillHub Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend API untuk sistem manajemen studio kursus keterampilan SkillHub menggunakan NestJS, TypeScript, dan Prisma ORM.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Deskripsi Proyek
 
-## Description
+SkillHub Backend adalah REST API yang menyediakan endpoint untuk mengelola:
+- **Peserta (Participants)**: Data peserta yang mendaftar kursus
+- **Kelas (Classes)**: Data kelas pelatihan yang tersedia
+- **Enrollment**: Pendaftaran peserta ke kelas (relasi many-to-many)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Teknologi yang Digunakan
 
-## Project setup
+- **Framework**: NestJS 11.0.1
+- **Language**: TypeScript 5.7.3
+- **Database**: MySQL
+- **ORM**: Prisma 5.22.0
+- **Validation**: class-validator 0.14.2
+- **Testing**: Jest 30.0.0
 
-```bash
-$ npm install
+## Arsitektur
+
+Project menggunakan arsitektur modular NestJS dengan struktur:
+
+```
+src/
+├── participant/          # Module untuk manajemen peserta
+│   ├── dto/             # Data Transfer Objects
+│   ├── participant.controller.ts
+│   ├── participant.service.ts
+│   └── participant.module.ts
+├── class/               # Module untuk manajemen kelas
+│   ├── dto/
+│   ├── class.controller.ts
+│   ├── class.service.ts
+│   └── class.module.ts
+├── enrollment/          # Module untuk manajemen enrollment
+│   ├── dto/
+│   ├── enrollment.controller.ts
+│   ├── enrollment.service.ts
+│   └── enrollment.module.ts
+├── prisma/              # Prisma service dan configuration
+│   ├── prisma.service.ts
+│   └── prisma.module.ts
+├── app.module.ts        # Root module
+└── main.ts              # Application entry point
 ```
 
-## Compile and run the project
+## Instalasi
 
+### Prerequisites
+
+- Node.js (v18 atau lebih baru)
+- MySQL Server
+- npm atau yarn
+
+### Langkah Instalasi
+
+1. **Clone repository dan masuk ke direktori backend**
+   ```bash
+   cd skillhub-backend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Setup database**
+
+   Buat file `.env` di root folder backend:
+   ```env
+   DATABASE_URL="mysql://username:password@localhost:3306/skillhub"
+   PORT=3000
+   ```
+
+   Sesuaikan `username`, `password`, dan nama database.
+
+4. **Jalankan Prisma migrations**
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. **Generate Prisma Client**
+   ```bash
+   npx prisma generate
+   ```
+
+## Menjalankan Aplikasi
+
+### Development Mode
 ```bash
-# development
-$ npm run start
+npm run start:dev
+```
+Server akan berjalan di `http://localhost:3000`
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+### Production Mode
+```bash
+npm run build
+npm run start:prod
 ```
 
-## Run tests
-
+### Watch Mode (Auto-reload)
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Deployment
+## API Endpoints
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Participants (Peserta)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| GET | `/participants` | Mengambil semua peserta |
+| GET | `/participants/:id` | Mengambil detail peserta by ID |
+| POST | `/participants` | Membuat peserta baru |
+| PATCH | `/participants/:id` | Update data peserta |
+| DELETE | `/participants/:id` | Hapus peserta |
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+**Request Body (POST/PATCH)**:
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phoneNumber": "08123456789",
+  "address": "Jl. Example No. 123"
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Classes (Kelas)
 
-## Resources
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| GET | `/classes` | Mengambil semua kelas |
+| GET | `/classes/:id` | Mengambil detail kelas by ID |
+| POST | `/classes` | Membuat kelas baru |
+| PATCH | `/classes/:id` | Update data kelas |
+| DELETE | `/classes/:id` | Hapus kelas |
 
-Check out a few resources that may come in handy when working with NestJS:
+**Request Body (POST/PATCH)**:
+```json
+{
+  "className": "Desain Grafis",
+  "description": "Belajar desain grafis dari dasar",
+  "instructor": "Jane Smith"
+}
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Enrollments (Pendaftaran)
 
-## Support
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| GET | `/enrollments` | Mengambil semua enrollment |
+| GET | `/enrollments/participant/:id` | Kelas yang diikuti peserta |
+| GET | `/enrollments/class/:id` | Peserta yang terdaftar di kelas |
+| POST | `/enrollments` | Daftarkan peserta ke kelas |
+| DELETE | `/enrollments/:id` | Batalkan pendaftaran |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+**Request Body (POST)**:
+```json
+{
+  "participantId": 1,
+  "classId": 2
+}
+```
 
-## Stay in touch
+## Database Schema
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Participant Model
+```prisma
+model Participant {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phoneNumber String?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  enrollments Enrollment[]
+}
+```
+
+### Class Model
+```prisma
+model Class {
+  id          Int      @id @default(autoincrement())
+  className   String
+  description String?
+  instructor  String
+  createdAt   DateTime @default(now())
+  enrollments Enrollment[]
+}
+```
+
+### Enrollment Model
+```prisma
+model Enrollment {
+  id             Int      @id @default(autoincrement())
+  participantId  Int
+  classId        Int
+  enrollmentDate DateTime @default(now())
+  participant    Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  class          Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+}
+```
+
+## Fitur Validasi
+
+### Participant DTO
+- `name`: Required, string
+- `email`: Required, valid email format
+- `phoneNumber`: Optional, string
+- `address`: Optional, string
+
+### Class DTO
+- `className`: Required, string
+- `description`: Optional, string
+- `instructor`: Required, string
+
+### Enrollment DTO
+- `participantId`: Required, integer
+- `classId`: Required, integer
+- **Duplicate Prevention**: Sistem otomatis mencegah pendaftaran ganda
+
+## Testing
+
+Proyek ini memiliki comprehensive unit tests dengan **58 test cases** dan **66% code coverage**.
+
+### Unit Tests
+
+Semua services memiliki unit tests lengkap:
+
+**ParticipantService Tests** (15 test cases)
+```bash
+npm test -- participant.service.spec
+```
+- ✅ CRUD operations (create, read, update, delete)
+- ✅ findAll with enrollments
+- ✅ findOne with nested relations
+- ✅ Error handling (database errors, not found)
+- ✅ Optional fields validation
+- ✅ Cascade delete behavior
+
+**ClassService Tests** (18 test cases)
+```bash
+npm test -- class.service.spec
+```
+- ✅ CRUD operations complete
+- ✅ Optional description field
+- ✅ Multiple class types
+- ✅ Partial updates
+- ✅ Error handling
+- ✅ Constraint violations
+
+**EnrollmentService Tests** (20 test cases)
+```bash
+npm test -- enrollment.service.spec
+```
+- ✅ Create with duplicate prevention
+- ✅ ConflictException on duplicates
+- ✅ findAll with relations
+- ✅ findEnrollmentsByParticipant
+- ✅ findEnrollmentsByClass
+- ✅ Delete and re-enrollment
+- ✅ Business logic validation
+
+### Run All Tests
+```bash
+npm test
+```
+
+Output:
+```
+Test Suites: 8 passed, 8 total
+Tests:       58 passed, 58 total
+Snapshots:   0 total
+```
+
+### Test Coverage
+```bash
+npm test -- --coverage
+```
+
+Coverage Summary:
+```
+----------------------------|---------|----------|---------|---------|
+File                        | % Stmts | % Branch | % Funcs | % Lines |
+----------------------------|---------|----------|---------|---------|
+All files                   |   65.9  |   73.07  |  58.53  |  66.21  |
+ Services                   |    100  |   75-83  |   100   |   100   |
+ Controllers                |   70-72 |    75    |  16.66  |  66-68  |
+ DTOs                       |    100  |    100   |   100   |   100   |
+----------------------------|---------|----------|---------|---------|
+```
+
+### Test Structure
+
+```
+src/
+├── participant/
+│   ├── participant.service.spec.ts    # 15 tests ✅
+│   └── participant.controller.spec.ts
+├── class/
+│   ├── class.service.spec.ts         # 18 tests ✅
+│   └── class.controller.spec.ts
+├── enrollment/
+│   ├── enrollment.service.spec.ts    # 20 tests ✅
+│   └── enrollment.controller.spec.ts
+└── prisma/
+    └── prisma.service.spec.ts
+```
+
+### Testing Approach
+
+- **Mocking**: PrismaService di-mock untuk menghindari database dependencies
+- **Isolation**: Setiap test independent dan tidak bergantung satu sama lain
+- **Coverage**: Mencakup happy path, edge cases, dan error scenarios
+- **Business Logic**: Duplicate prevention, cascade deletes, relational queries
+
+### E2E Tests
+```bash
+npm run test:e2e
+```
+
+### Watch Mode (Development)
+```bash
+npm test -- --watch
+```
+
+### Specific Test File
+```bash
+npm test -- <filename>
+# Example:
+npm test -- participant.service.spec
+```
+
+## Prisma Commands
+
+### Membuka Prisma Studio (Database GUI)
+```bash
+npx prisma studio
+```
+
+### Membuat Migration Baru
+```bash
+npx prisma migrate dev --name migration_name
+```
+
+### Reset Database
+```bash
+npx prisma migrate reset
+```
+
+## CORS Configuration
+
+CORS sudah di-enable untuk frontend development. Konfigurasi ada di `main.ts`:
+```typescript
+app.enableCors();
+```
+
+## Environment Variables
+
+Buat file `.env` dengan variabel berikut:
+```env
+DATABASE_URL="mysql://username:password@localhost:3306/skillhub"
+PORT=3000
+```
+
+## Best Practices yang Diimplementasikan
+
+1. **Modular Architecture**: Setiap entity punya module terpisah
+2. **Dependency Injection**: Menggunakan NestJS DI container
+3. **DTO Validation**: Validasi otomatis dengan class-validator
+4. **Service Layer**: Business logic terpisah dari controller
+5. **Prisma ORM**: Type-safe database access
+6. **Error Handling**: Proper exception handling (ConflictException, dll)
+7. **TypeScript**: Full type safety
+8. **Documentation**: JSDoc comments pada semua functions
+
+## Troubleshooting
+
+### Database Connection Error
+- Pastikan MySQL server running
+- Cek kredensial di `.env`
+- Verifikasi database sudah dibuat
+
+### Prisma Client Error
+```bash
+npx prisma generate
+```
+
+### Port Already in Use
+Ubah PORT di `.env` atau kill process yang menggunakan port 3000
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT

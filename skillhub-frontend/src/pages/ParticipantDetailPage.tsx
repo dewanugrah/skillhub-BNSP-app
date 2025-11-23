@@ -1,6 +1,6 @@
 // src/pages/ParticipantDetailPage.tsx
-import { useState, useEffect } from 'react';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -15,7 +15,13 @@ import {
   Divider,
   Link,
   Paper,
+  Button,
+  Stack,
+  Grid,
+  Chip,
+  Avatar,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getParticipantById } from '../services/participantService';
 import { findEnrollmentsByParticipant } from '../services/enrollmentService';
 import type { Participant } from '../types/participant';
@@ -24,12 +30,13 @@ import ErrorDisplay from '../components/ErrorDisplay';
 
 const ParticipantDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!id) return;
 
     try {
@@ -48,11 +55,11 @@ const ParticipantDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -83,25 +90,65 @@ const ParticipantDetailPage = () => {
   }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Card>
-        <CardContent>
+    <Container sx={{ mt: 2, mb: 6 }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={2} sx={{ mb: 3 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          sx={{ alignSelf: 'flex-start' }}
+        >
+          Kembali
+        </Button>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            {participant.name}
+            Detail Peserta
           </Typography>
-          <Typography variant="body1">
-            <strong>Email:</strong> {participant.email}
+          <Typography color="text.secondary">
+            Profil singkat, kontak, dan kelas yang diikuti.
           </Typography>
-          <Typography variant="body1">
-            <strong>Telepon:</strong> {participant.phoneNumber || 'N/A'}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Alamat:</strong> {participant.address || 'N/A'}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Bergabung pada:</strong> {new Date(participant.createdAt).toLocaleDateString()}
-          </Typography>
-        </CardContent>
+        </Box>
+      </Stack>
+
+      <Card
+        sx={{
+          p: 3,
+          border: '1px solid rgba(15,118,110,0.14)',
+          background: 'linear-gradient(135deg, rgba(15,118,110,0.08), rgba(245,158,11,0.06))',
+        }}
+        elevation={0}
+      >
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center">
+          <Avatar sx={{ bgcolor: 'primary.main', width: 72, height: 72, fontSize: 28 }}>
+            {participant.name.charAt(0).toUpperCase()}
+          </Avatar>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              {participant.name}
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Chip label={participant.email} color="primary" variant="outlined" />
+              <Chip label={participant.phoneNumber || 'Telepon: N/A'} variant="outlined" />
+              <Chip label={`${enrollments.length} kelas diikuti`} color="secondary" variant="filled" />
+            </Stack>
+          </Box>
+          <Box sx={{ minWidth: 140, textAlign: { xs: 'left', sm: 'right' } }}>
+            <Typography variant="body2" color="text.secondary">
+              Bergabung
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {new Date(participant.createdAt).toLocaleDateString()}
+            </Typography>
+          </Box>
+        </Stack>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={12}>
+            <Typography variant="body2" color="text.secondary">
+              Alamat
+            </Typography>
+            <Typography variant="body1">{participant.address || 'Belum diisi'}</Typography>
+          </Grid>
+        </Grid>
       </Card>
 
       <Box sx={{ mt: 4 }}>
@@ -109,17 +156,27 @@ const ParticipantDetailPage = () => {
           Kelas yang Diikuti
         </Typography>
         {enrollments.length > 0 ? (
-          <List component={Paper}>
+          <List component={Paper} sx={{ borderRadius: 2, overflow: 'hidden' }}>
             {enrollments.map((enrollment, index) => (
               <Box key={enrollment.id}>
-                <ListItem>
+                <ListItem alignItems="flex-start">
                   <ListItemText
                     primary={
                       <Link component={RouterLink} to={`/classes/${enrollment.class.id}`} underline="hover">
                         {enrollment.class.className}
                       </Link>
                     }
-                    secondary={`Instruktur: ${enrollment.class.instructor}`}
+                    secondary={
+                      <>
+                        <Typography component="span" variant="body2" color="text.secondary">
+                          Instruktur: {enrollment.class.instructor}
+                        </Typography>
+                        <br />
+                        <Typography component="span" variant="body2" color="text.secondary">
+                          Terdaftar: {new Date(enrollment.enrollmentDate).toLocaleDateString()}
+                        </Typography>
+                      </>
+                    }
                   />
                 </ListItem>
                 {index < enrollments.length - 1 && <Divider />}

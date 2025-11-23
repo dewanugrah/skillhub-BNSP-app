@@ -12,8 +12,8 @@ import type { Class } from '../types/class';
 
 // Define the validation schema using Zod
 const enrollmentSchema = z.object({
-  participantId: z.number({ invalid_type_error: 'Pilih Peserta' }).int().positive({ message: 'Pilih Peserta' }),
-  classId: z.number({ invalid_type_error: 'Pilih Kelas' }).int().positive({ message: 'Pilih Kelas' }),
+  participantId: z.coerce.number().int().positive({ message: 'Pilih Peserta' }),
+  classId: z.coerce.number().int().positive({ message: 'Pilih Kelas' }),
 });
 
 interface EnrollmentFormProps {
@@ -24,7 +24,6 @@ interface EnrollmentFormProps {
 const EnrollmentForm = ({ onSubmit, onCancel }: EnrollmentFormProps) => {
   const {
     handleSubmit,
-    control,
     register,
     formState: { errors },
   } = useForm<EnrollmentCreationData>({
@@ -76,7 +75,7 @@ const EnrollmentForm = ({ onSubmit, onCancel }: EnrollmentFormProps) => {
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ mt: 1 }}
+      sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}
     >
       <FormControl fullWidth margin="normal" error={!!errors.participantId}>
         <InputLabel id="participant-label">Peserta</InputLabel>
